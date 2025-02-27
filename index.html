@@ -57,22 +57,31 @@
   </form>
 
   <script>
+    // Helper function to capitalize the first letter
+    function capitalizeFirstLetter(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    }
+
     // Extract service and city from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const service = urlParams.get('service') || 'HVAC'; // Default to "HVAC"
     const city = urlParams.get('city') || 'Austin'; // Default to "Austin"
 
+    // Capitalize the first letter of service and city
+    const formattedService = capitalizeFirstLetter(service);
+    const formattedCity = capitalizeFirstLetter(city);
+
     // Update the form title dynamically
-    document.getElementById('serviceType').textContent = service;
-    document.getElementById('city').textContent = city;
+    document.getElementById('serviceType').textContent = formattedService;
+    document.getElementById('city').textContent = formattedCity;
 
     // Handle form submission
     document.getElementById('leadForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
       const data = {
-        serviceType: service.toLowerCase(), // Use dynamic service
-        city: city.toLowerCase(), // Use dynamic city
+        serviceType: service.toLowerCase(), // Use lowercase for backend
+        city: city.toLowerCase(), // Use lowercase for backend
         businessName: formData.get('businessName'),
         email: formData.get('email'),
         objection1: formData.get('objection1'),
