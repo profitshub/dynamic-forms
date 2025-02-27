@@ -1,56 +1,91 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Service Lead Preferences</title>
+  <title>HVAC Lead Form</title>
   <style>
-    /* Same styling as before */
+    body { font-family: Arial; max-width: 600px; margin: 20px auto; padding: 20px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; }
+    input, select { width: 100%; padding: 8px; }
+    button { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; }
   </style>
 </head>
 <body>
-  <h2>Get Free {{Service}} Leads in {{City}}</h2>
-  <form action="http://127.0.0.1:5678/webhook/hvac-form" method="POST">
-    <input type="hidden" name="serviceType" value="hvac">
-    <input type="hidden" name="city" value="austin">
-
-    <!-- Hidden fields for service/city -->
-    <input type="hidden" id="serviceType" name="serviceType">
-    <input type="hidden" id="city" name="city">
-
+  <h2>Get HVAC Leads in Austin</h2>
+  <form id="hvacForm">
     <div class="form-group">
       <label>Business Name:</label>
       <input type="text" name="businessName" required>
     </div>
     <div class="form-group">
-      <label>Contact Email:</label>
+      <label>Email:</label>
       <input type="email" name="email" required>
     </div>
-    <!-- Dynamic Questions Based on Service/City -->
-    <div class="form-group" id="dynamicQuestions"></div>
-    <button type="submit">Get Leads</button>
+    <div class="form-group">
+      <label>Top Customer Objection:</label>
+      <select name="objection1" required>
+        <option value="pricing">Pricing</option>
+        <option value="availability">Availability</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Lead Type:</label>
+      <select name="leadType" required>
+        <option value="residential">Residential</option>
+        <option value="commercial">Commercial</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>24/7 Emergency Service?</label>
+      <select name="emergency_service" required>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Financing Offered?</label>
+      <select name="financing" required>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>License Number:</label>
+      <input type="text" name="license" required>
+    </div>
+    <button type="submit">Submit</button>
   </form>
 
   <script>
-    // Extract service/city from URL params
-    const urlParams = new URLSearchParams(window.location.search);
-    document.getElementById('serviceType').value = urlParams.get('service');
-    document.getElementById('city').value = urlParams.get('city');
+    document.getElementById('hvacForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = {
+        serviceType: 'hvac',
+        city: 'austin',
+        businessName: formData.get('businessName'),
+        email: formData.get('email'),
+        objection1: formData.get('objection1'),
+        leadType: formData.get('leadType'),
+        emergency_service: formData.get('emergency_service'),
+        financing: formData.get('financing'),
+        license: formData.get('license')
+      };
 
-    // Fetch dynamic questions from a JSON (hosted on GitHub or n8n)
-    const service = urlParams.get('service');
-    const city = urlParams.get('city');
-    fetch(`https://your-n8n-workflow.com/questions?service=${service}&city=${city}`)
-      .then(response => response.json())
-      .then(data => {
-        const questionsHTML = data.questions.map(q => `
-          <label>${q.label}</label>
-          <select name="${q.name}" required>
-            ${q.options.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('')}
-          </select>
-        `).join('');
-        document.getElementById('dynamicQuestions').innerHTML = questionsHTML;
-      });
+      try {
+        const response = await fetch('http://127.0.0.1:5678/webhook/hvac-form', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
 
-    // Submit to n8n (same as before)
+        if (!response.ok) throw new Error('Submission failed');
+        alert('Submitted!');
+        e.target.reset(); // Clear the form
+      } catch (error) {
+        alert('Error: Please try again later.');
+      }
+    });
   </script>
 </body>
 </html>
